@@ -1,0 +1,29 @@
+[]
+ /* app.get("/ip-location", async (req, res) => {
+  const ip =
+    req.headers["x-forwarded-for"] ||
+    req.socket.remoteAddress;
+
+  const response = await fetch(`http://ip-api.com/json/${ip}`);
+  const data = await response.json();
+
+  res.json({
+    ip,
+    location: data
+  });
+});
+ */
+ 
+ 
+ /* const axios = require("axios");
+
+async function getLocationFromIP(ip) {
+  const res = await axios.get(`http://ip-api.com/json/${ip}`);
+  return res.data;
+}
+
+// Example
+getLocationFromIP("8.8.8.8").then(data => {
+  console.log(data);
+});
+ */
