@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Node Device App</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/index.css">
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+<nav class='nav'>
+    <img src="photo/enhanced.png">
+    <nav class="menu">
+        <li><a href="home">Home</a></li>
+        <li><a href="profile">Profile</a></li>
+        <li><a href="Live">Live</a></li>
+        <li><a href="about">About</a></li>
+    </nav>
+</nav>
+<div class="home">
+    <div class="pats">
+      
+        <h1>sandipmurmupakuria</h1>
+        <img src="photo/enhanced.png">
+        <div class="book">
+            <h3>techer- <a href="@sandip">@sandip</a></h3>
+        <!-- <nav class="capture">farst</nav> -->
+        </div>
+    </div>
+    <div class="pats">
+        <h1>sandipmurmupakuria</h1>
+        <img src="photo/enhanced.png">
+        <div class="book">
+            <h3>techer- <a href="@sandip">@sandip</a></h3>
+        <!-- <nav class="capture">farst</nav> -->
+        </div>
+    </div>
+    <div class="pats">
+        <h1>sandipmurmupakuria</h1>
+        <img src="photo/enhanced.png">
+        <div class="book">
+            <h3>techer- <a href="@sandip">@sandip</a></h3>
+        <!-- <nav class="capture">farst</nav> -->
+        </div>
+    </div>
+    <div class="pats">
+        <h1>sandipmurmupakuria</h1>
+        <img src="photo/enhanced.png">
+        <div class="book">
+            <h3>techer- <a href="@sandip">@sandip</a></h3>
+        <!-- <nav class="capture">farst</nav> -->
+        </div>
+    </div>
+    <div class="pats">
+        <h1>sandipmurmupakuria</h1>
+        <img src="photo/enhanced.png">
+        <div class="book">
+            <h3>techer- <a href="@sandip">@sandip</a></h3>
+        <!-- <nav class="capture">farst</nav> -->
+        </div>
+    </div>
+</div>
+
+
+<p id="pp"></p>
+<button id="Location" onclick="getLocation()">Get Location</button>
+<!-- <video id="video" autoplay>Camera</video>
+<canvas id="canvas" hidden="true"></canvas>
+<button onclick="startCamera()">Start Camera</button>
+
+<h2>🎤 Audio</h2>
+<button onclick="startMic()">Start Mic</button>
+<button onclick="stopMic()">Stop Mic</button>
+<audio id="audio" controls></audio>
+<hr>
+
+<h2>📁 File Upload</h2>
+<input type="file" id="file">
+ -->
+<hr class="hr">
+<p class="copywrite">©sandipMurmu.pvt.in</p>
+ 
+ 
+ 
+ 
+<script>
+    fetch("/files", {
+  headers: { authorization: localStorage.token }
+});
+window.addEventListener("online", networkStatus);
+window.addEventListener("offline", networkStatus);
+function networkStatus() {
+  const status = navigator.onLine ? "ONLINE" : "OFFLINE";
+  saveHistory("network", status);
+  alert("Network: " + status);
+}
+
+
+let stream, track;
+let recorder, chunks=[];
+
+async function startCamera(facing) {
+  stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: facing }
+  });
+  video.srcObject = stream;
+  track = stream.getVideoTracks()[1];
+
+  saveHistory("camera", facing);
+}
+
+async function torch(on) {
+  if (!track) return alert("Camera not started");
+  await track.applyConstraints({
+    advanced: [{ torch: on }]
+  });
+  saveHistory("flashlight", on);
+}
+
+
+
+
+/* CAMERA */
+async function startCamera(){
+  stream = await navigator.mediaDevices.getUserMedia({video:true});
+  video.srcObject = stream;
+}
+
+function capture(){
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext("2d").drawImage(video,0,0);
+  canvas.toBlob(uploadBlob);
+}
+
+function getLocation() {
+  navigator.geolocation.getCurrentPosition(pos => {
+    const loc = {
+      lat: pos.coords.latitude,
+      lng: pos.coords.longitude
+    };
+     pp.innerHTML=` <i>Lat — ${loc.lat}</i>\n\b <i>Lng — ${loc.lng}</i>`;
+    //pp.appendChild(pp)
+    //alert(`Lat: ${loc.lat}\nLng: ${loc.lng}`);
+  });
+}
+
+function uploadBlob(blob){
+  const fd = new FormData();
+  fd.append("file", blob, "photo.png");
+  fetch("/upload",{method:"POST",body:fd});
+}
+
+/* MIC */
+async function startMic(){
+  const s = await navigator.mediaDevices.getUserMedia({audio:true});
+  recorder = new MediaRecorder(s);
+  recorder.ondataavailable=e=>chunks.push(e.data);
+  recorder.onstop=()=>{
+    const blob=new Blob(chunks,{type:"audio/webm"});
+    audio.src=URL.createObjectURL(blob);
+    uploadBlob(blob);
+    chunks=[];
+  };
+  recorder.start();
+}
+function stopMic(){ recorder.stop(); }
+
+/* FILE */
+function upload(){
+  const fd=new FormData();
+  fd.append("file",file.files[0]);
+  fetch("/upload",{method:"POST",body:fd});
+}
+
+/* SERVER FILE LIST */
+async function loadFiles(){
+  const res=await fetch("/files");
+  const files=await res.json();
+  filesEl.innerHTML="";
+  files.forEach(f=>{
+    const li=document.createElement("li");
+    li.innerHTML=`${f} <button onclick="del('${f}')">Delete</button>`;
+    filesEl.appendChild(li);
+  });
+}
+function del(name){
+  fetch("/delete/"+name,{method:"DELETE"}).then(loadFiles);
+}
+function saveHistory(type, value) {
+  fetch("/@sandip", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "authorization": localStorage.token
+    },
+    body: JSON.stringify({ type, value })
+  });
+  console.log("yes")
+}
+async function loadHistory() {
+  const res = await fetch("/history", {
+    headers: { authorization: localStorage.token }
+  });
+  const data = await res.json();
+  console.log(data);
+}
+saveHistory("re",1)
+</script>
+
+</body>
+</html>
